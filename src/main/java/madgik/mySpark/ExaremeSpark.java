@@ -33,19 +33,6 @@ public class ExaremeSpark {
 						.appName("ExaremeSpark")
 						.getOrCreateExareme();
 				
-				/* textwindow2s registration */
-//				spark.getSparkSession().udf().register("textwindow2s", new UDF4<String, Integer, Integer, Integer, ArrayList<ArrayList<String>>>(){
-//					@Override
-//					public ArrayList<ArrayList<String>> call(String s, Integer prev, Integer mid, Integer next){
-//						String[] tokens = s.split(" ");
-//						for(int i = 0; i < tokens.length-mid+1; i++){
-//							int im = i+mid;
-//							
-//						}
-//						return "hello";
-//					}
-//				}, DataTypes.StringType);
-				
 				String query;
 				try{
 					query = reader.readLine(Console.ANSI_BOLD+Console.ANSI_BRIGHT_GREEN + "exaremeSQL> "+ Console.ANSI_RESET);
