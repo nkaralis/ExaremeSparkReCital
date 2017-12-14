@@ -17,12 +17,12 @@ import org.apache.spark.sql.types.StructType;
 import madgik.mySpark.parser.exception.VtExtensionParserCancelationException;
 
 
-public class Normalizeudf implements ExaremeVtFunction{
+public class NormalizeVT implements ExaremeVtFunction{
 	
 	private String delimeter;
 	private String filePath;
 	
-	public Normalizeudf(String delimeter, String filePath) {
+	public NormalizeVT(String delimeter, String filePath) {
 		super();
 		this.delimeter = delimeter;
 		this.filePath = filePath;
@@ -45,7 +45,7 @@ public class Normalizeudf implements ExaremeVtFunction{
 	}
 	
 	public String mapReduce(SparkSession spark) throws VtExtensionParserCancelationException{
-		
+			
 			// Create an RDD
 			JavaRDD<String> peopleRDD = spark.sparkContext()
 			  .textFile(filePath, 1)
