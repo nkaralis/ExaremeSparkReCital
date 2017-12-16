@@ -9,6 +9,7 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.functions;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
@@ -55,8 +56,12 @@ public class Charinvindex implements ExaremeVtFunction {
 			rows.add(RowFactory.create(key, String.join(",", inv_index.get(key))));
 		}
 		// create dataset and view
-		Dataset<Row> output_dataset = spark.createDataFrame(rows, schema);
-		output_dataset.limit(100).createOrReplaceTempView("charinvindex");	
+		Dataset<Row> inv_index_dataset = spark.createDataFrame(rows, schema);
+		
+		// start building characteristic inverted index
+		// Dataset<Row> char_inv_index_dataset = inv_index_dataset.filter(functions.length(inv_index_dataset.col("title_id").equalTo(1)));
+		//inv_index_dataset.filter(functions.length(inv_index_dataset.col("title_id").equalTo('1'))).limit(100).createOrReplaceTempView("charinvindex");
+		inv_index_dataset.limit(100).createOrReplaceTempView("charinvindex");
 		return "charinvindex";
 	}
 
