@@ -3,7 +3,9 @@ package madgik.mySpark.vtFunctions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.TreeSet;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -13,6 +15,8 @@ import org.apache.spark.sql.functions;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+
+import scala.reflect.internal.util.Set;
 
 public class Charinvindex implements ExaremeVtFunction {
 	
@@ -28,10 +32,8 @@ public class Charinvindex implements ExaremeVtFunction {
 		String schemaString = "trigram title_id";
 		// Generate the schema based on the string of schema
 		List<StructField> fields = new ArrayList<StructField>();
-		for (String fieldName : schemaString.split(" ")) {
-		  StructField field = DataTypes.createStructField(fieldName, DataTypes.StringType, true);
-		  fields.add(field);
-		}
+		fields.add(DataTypes.createStructField("trigram", DataTypes.StringType, true));
+		fields.add(DataTypes.createStructField("title_id", DataTypes.StringType, true));
 		StructType schema = DataTypes.createStructType(fields);
 		
 		// Iterate rows of input dataset
@@ -53,14 +55,22 @@ public class Charinvindex implements ExaremeVtFunction {
 		// Create list of rows from the inverted_index
 		ArrayList<Row> rows = new ArrayList<Row>();
 		for(String key : inv_index.keySet()) {
-			rows.add(RowFactory.create(key, String.join(",", inv_index.get(key))));
+			rows.add(RowFactory.create(key, String.join(",",inv_index.get(key))));
 		}
-		// create dataset and view
+		// Create dataset for the inverted_index
 		Dataset<Row> inv_index_dataset = spark.createDataFrame(rows, schema);
 		
-		// start building characteristic inverted index
-		// Dataset<Row> char_inv_index_dataset = inv_index_dataset.filter(functions.length(inv_index_dataset.col("title_id").equalTo(1)));
-		//inv_index_dataset.filter(functions.length(inv_index_dataset.col("title_id").equalTo('1'))).limit(100).createOrReplaceTempView("charinvindex");
+		// Start building characteristic inverted index
+		Dataset<Row> char_inv_index_dataset = spark.emptyDataFrame();
+		TreeSet<String> titles = new TreeSet<String>();
+		for(Row r : input_dataset.select("title_id").collectAsList()) {
+			titles.add(r.getString(0));
+		}
+		int threshold = 1;
+		while(!titles.isEmpty()) {
+			
+		}
+		
 		inv_index_dataset.limit(100).createOrReplaceTempView("charinvindex");
 		return "charinvindex";
 	}
