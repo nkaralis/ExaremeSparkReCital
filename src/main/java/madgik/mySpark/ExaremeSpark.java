@@ -1,5 +1,6 @@
 package madgik.mySpark;
-
+import org.apache.spark.sql.api.java.UDF1;
+import org.apache.spark.sql.types.DataTypes;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.jline.reader.EndOfFileException;
@@ -9,6 +10,8 @@ import org.jline.reader.UserInterruptException;
 import madgik.mySpark.console.Console;
 import madgik.mySpark.parser.ParserUtils;
 import madgik.mySpark.parser.exception.VtExtensionParserException;
+
+///
 
 public class ExaremeSpark {
 	
@@ -28,7 +31,7 @@ public class ExaremeSpark {
 						.appName("ExaremeSpark")
 						.getOrCreateExareme();   
 				
-				
+				spark.getSparkSession().udf().register("Normtitles",Normtitles,DataTypes.StringType);
 				String query;
 				try{
 					query = reader.readLine(Console.ANSI_BOLD+Console.ANSI_BRIGHT_GREEN + "exaremeSQL> "+ Console.ANSI_RESET);
@@ -39,7 +42,7 @@ public class ExaremeSpark {
 				}
 				
 				try{
-					spark.sqlExtended(query).show();;
+					spark.sqlExtended(query).show(100,false);;
 				}catch(VtExtensionParserException e) {
 					if(e.getMessage() != null)
 						Console.printMessage(ParserUtils.displayError(e.getMessage()));
@@ -56,5 +59,10 @@ public class ExaremeSpark {
 		
 			
 	}
+	private static UDF1<String,String> Normtitles = new UDF1<String,String>(){
+		public String call(final String str) throws Exception{
+			return str.toLowerCase().replaceAll("[^a-zA-z0-9 ]","_").replaceAll(" +"," ");
+		}
+	};
 
 }
