@@ -16,6 +16,8 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 
+//updated findsignals now cleans empty lines or lines with less than 10 characters
+
 public class Findsignals implements ExaremeVtFunction{
 	
 	private String filepath;
@@ -24,7 +26,8 @@ public class Findsignals implements ExaremeVtFunction{
 	public Findsignals(String filePath) {
 		super();
 		this.filepath = filePath;
-		this.pattern = "((.*)1[5-9]\\d{2,2}[.| *](.*))|((.*)20\\d{2,2}[.| *](.*))|((.*)et al(.*))|((.*)http(.*))";
+		//this.pattern = "((.*)1[5-9]\\d{2,2}[.| *](.*))|((.*)20\\d{2,2}[.| *](.*))|((.*)et al(.*))|((.*)http(.*))";
+		this.pattern = "19\\d{2}|20\\d{2}|((.*)et al(.*))|((.*)http(.*))";
 	}
 	
 	@Override
@@ -49,21 +52,23 @@ public class Findsignals implements ExaremeVtFunction{
 		Pattern r = Pattern.compile(this.pattern);
 		//now let's convert lines from input file to rows
 		for(String line:signalRDD.collect()) {
-			Matcher matcher = r.matcher(line);
-			int result = -1;
-			if (matcher.find())
-					result = 1;
-			else
-					result = 0;
-			//now add a new row to result containing the initial row of the file and the result of regex matching
-			densearray.add(RowFactory.create(line,Integer.toString(result)));
+			if (line.length() >=10 && !(line.trim().isEmpty())) { //for the case that line has only spaces
+				Matcher matcher = r.matcher(line);
+				int result = -1;
+				if (matcher.find())
+						result = 1;
+				else
+						result = 0;
+				//now add a new row to result containing the initial row of the file and the result of regex matching
+				densearray.add(RowFactory.create(line,Integer.toString(result)));
+			}
 		}
 		
 		
 
 		// finally we create dataset and view
 		Dataset<Row> output_dataset = spark.createDataFrame(densearray, schema);
-		output_dataset.limit(2).createOrReplaceTempView("finddensities");
+		output_dataset.limit(10).createOrReplaceTempView("finddensities");
 		return "finddensities";
 	}
 }
