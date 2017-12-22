@@ -27,7 +27,7 @@ public class Findsignals implements ExaremeVtFunction{
 		super();
 		this.filepath = filePath;
 		//this.pattern = "((.*)1[5-9]\\d{2,2}[.| *](.*))|((.*)20\\d{2,2}[.| *](.*))|((.*)et al(.*))|((.*)http(.*))";
-		this.pattern = "19\\d{2}|20\\d{2}|((.*)et al(.*))|((.*)http(.*))";
+		this.pattern = "((.*)1[5-9]\\d{2,2}(.*))|((.*)20\\d{2,2}(.*))|((.*)[^A-Za-z0-9]et al[^A-Za-z0-9](.*))|((.*)http(.*))";  
 	}
 	
 	@Override
@@ -68,7 +68,7 @@ public class Findsignals implements ExaremeVtFunction{
 
 		// finally we create dataset and view
 		Dataset<Row> output_dataset = spark.createDataFrame(densearray, schema);
-		output_dataset.limit(10).createOrReplaceTempView("finddensities");
+		output_dataset.limit(1500).createOrReplaceTempView("finddensities");
 		return "finddensities";
 	}
 }
