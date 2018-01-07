@@ -35,55 +35,33 @@ public class Charinvindex implements ExaremeVtFunction {
 		fields.add(DataTypes.createStructField("trigram", DataTypes.StringType, true));
 		fields.add(DataTypes.createStructField("title_id", DataTypes.createArrayType(DataTypes.StringType), true));
 		StructType schema = DataTypes.createStructType(fields);
-		
-		// Iterate rows of input dataset
-		HashMap<String, ArrayList<String>> inv_index = new HashMap<String, ArrayList<String>>();
-		// Create inverted index
-		for (Row r : input_dataset.select("title_id", "middle").collectAsList()) {
-			String trigram = r.getString(1);
-			String id = r.getString(0);
-			if (!inv_index.containsKey(trigram)) {
-				inv_index.put(trigram, new ArrayList<String>());
-				inv_index.get(trigram).add(id);
-			}
-			else {
-				if (!inv_index.get(trigram).contains(id))
-					inv_index.get(trigram).add(id);
-			}
-		}
-		
-		// Create list of rows from the inverted_index
-		ArrayList<Row> rows = new ArrayList<Row>();
-		for(String key : inv_index.keySet()) {
-			rows.add(RowFactory.create(key, inv_index.get(key).toArray()));
-		}
-		// Create dataset for the inverted_index
-		Dataset<Row> inv_index_dataset = spark.createDataFrame(rows, schema);
-		
+				
 		// Start building characteristic inverted index
 		Dataset<Row> char_inv_index_dataset = spark.createDataFrame(new ArrayList<Row>(), schema);
 		TreeSet<String> titles = new TreeSet<String>();
 		TreeSet<String> titles_to_be_removed = new TreeSet<String>();
 		for(Row r : input_dataset.select("title_id").collectAsList()) {
-			titles.add(r.getString(0));
+			for(Object s : r.getList(0)) {
+				titles.add((String)s);
+			}
 		}
 		int threshold = 1;
 		while(!titles.isEmpty()) {
 			ArrayList<Row> new_rows = new ArrayList<Row>();
-			Dataset<Row> temp = inv_index_dataset.filter(functions.size(inv_index_dataset.col("title_id")).equalTo(threshold));
+			Dataset<Row> temp = input_dataset.filter(functions.size(input_dataset.col("title_id")).equalTo(threshold));
 			if(temp.count() > 0) {
 				char_inv_index_dataset = char_inv_index_dataset.union(temp).dropDuplicates("title_id");
 				for(Row r : temp.select("title_id").collectAsList()) {
 					titles_to_be_removed.addAll(r.getList(0));
 				}
 				titles.removeAll(titles_to_be_removed);
-				for(Row r : inv_index_dataset.collectAsList()) {
+				for(Row r : input_dataset.collectAsList()) {
 					List<String> new_list = r.getList(1);
 					ArrayList<String> temp_arraylist = new ArrayList<String>(new_list);
 					temp_arraylist.removeAll(titles_to_be_removed);
 					if(new_list.size() > 0) new_rows.add(RowFactory.create(r.getString(0), temp_arraylist));
 				}
-				inv_index_dataset = spark.createDataFrame(new_rows, schema);
+				input_dataset = spark.createDataFrame(new_rows, schema);
 			}
 			else {
 				threshold ++;
