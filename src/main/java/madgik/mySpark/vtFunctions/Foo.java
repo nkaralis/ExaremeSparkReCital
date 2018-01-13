@@ -71,7 +71,7 @@ public class Foo {
 			Dataset<Row> peopleDataFrame = spark.createDataFrame(rowRDD, schema);
 	
 			// Creates a temporary view using the DataFrame
-			peopleDataFrame.limit(100).createOrReplaceTempView("people");
+			peopleDataFrame.createOrReplaceTempView("people");
 			
 			return "people";
 		}catch(Exception e){
