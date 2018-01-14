@@ -68,7 +68,7 @@ public class Charinvindex implements ExaremeVtFunction {
 			}
 		}
 		
-		char_inv_index_dataset.limit(50).createOrReplaceTempView("charinvindex");
+		char_inv_index_dataset.createOrReplaceTempView("charinvindex");
 		return "charinvindex";
 	}
 

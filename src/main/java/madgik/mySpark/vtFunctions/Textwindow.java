@@ -66,7 +66,7 @@ public class Textwindow implements ExaremeVtFunction {
 		}
 		// create dataset and view
 		Dataset<Row> output_dataset = spark.createDataFrame(textwindow, schema);
-		output_dataset.limit(50).createOrReplaceTempView("textwindow2s");
+		output_dataset.createOrReplaceTempView("textwindow2s");
 		return "textwindow2s";
 	}
 
