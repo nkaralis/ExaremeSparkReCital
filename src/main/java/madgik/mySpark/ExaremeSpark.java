@@ -10,6 +10,7 @@ import org.jline.reader.UserInterruptException;
 import madgik.mySpark.console.Console;
 import madgik.mySpark.parser.ParserUtils;
 import madgik.mySpark.parser.exception.VtExtensionParserException;
+import madgik.mySpark.udaf.Joinstr;
 
 ///
 
@@ -32,6 +33,7 @@ public class ExaremeSpark {
 						.getOrCreateExareme();   
 				
 				spark.getSparkSession().udf().register("Normtitles",Normtitles,DataTypes.StringType);
+				spark.getSparkSession().udf().register("Joinstr", new Joinstr());
 				String query;
 				try{
 					query = reader.readLine(Console.ANSI_BOLD+Console.ANSI_BRIGHT_GREEN + "exaremeSQL> "+ Console.ANSI_RESET);
@@ -42,7 +44,7 @@ public class ExaremeSpark {
 				}
 				
 				try{
-					spark.sqlExtended(query).show(100000,false);;
+					spark.sqlExtended(query).show(100,false);;
 				}catch(VtExtensionParserException e) {
 					if(e.getMessage() != null)
 						Console.printMessage(ParserUtils.displayError(e.getMessage()));
