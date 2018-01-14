@@ -42,7 +42,7 @@ public class ExaremeSpark {
 				}
 				
 				try{
-					spark.sqlExtended(query).show(100,false);;
+					spark.sqlExtended(query).show(100000,false);;
 				}catch(VtExtensionParserException e) {
 					if(e.getMessage() != null)
 						Console.printMessage(ParserUtils.displayError(e.getMessage()));
