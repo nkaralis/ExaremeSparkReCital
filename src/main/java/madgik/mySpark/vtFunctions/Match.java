@@ -30,7 +30,7 @@ public class Match implements ExaremeVtFunction {
 		// Generate the schema based on the string of schema
 		List<StructField> fields = new ArrayList<StructField>();
 		fields.add(DataTypes.createStructField("reference", DataTypes.StringType, true));
-		//fields.add(DataTypes.createStructField("title", DataTypes.StringType, true));
+		fields.add(DataTypes.createStructField("md_trigram", DataTypes.StringType, true));
 		fields.add(DataTypes.createStructField("md_article_id", DataTypes.createArrayType(DataTypes.StringType), true));
 		StructType schema = DataTypes.createStructType(fields);
 		
@@ -41,8 +41,8 @@ public class Match implements ExaremeVtFunction {
 			for(Row metadata : char_inv_index.collectAsList()) { // iterate over the trigrams of the metadata
 				//System.out.println(ref.getString(2)+" || "+metadata.getString(0));
 				if(ref.getString(2).compareTo(metadata.getString(0)) == 0) {
-					String temp = ref.getString(3);
-					matches.add(RowFactory.create(temp, metadata.getList(1)));
+					String temp = ref.getString(1)+" "+ref.getString(2)+" "+ref.getString(3);
+					matches.add(RowFactory.create(temp, metadata.getString(0), metadata.getList(1)));
 				}
 			}
 			
