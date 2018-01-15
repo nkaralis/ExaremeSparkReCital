@@ -55,7 +55,7 @@ public class Metadata {
 			Dataset<Row> metadata = spark.createDataFrame(rowRDD, schema);
 	
 			// Creates a temporary view using the DataFrame
-			metadata.createOrReplaceTempView("metadata");
+			metadata.limit(100).createOrReplaceTempView("metadata");
 			
 			return "metadata";
 		}catch(Exception e){
