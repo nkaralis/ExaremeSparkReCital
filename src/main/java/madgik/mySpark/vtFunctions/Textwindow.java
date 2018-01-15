@@ -66,13 +66,17 @@ public class Textwindow implements ExaremeVtFunction {
 				for(int i = 0; i < tokens.length-mid+1; i++) {
 					int im = i+mid;
 					String previous;
+					String next;
 					if(i-prev < 0)
 						previous = String.join(" ", Arrays.copyOfRange(tokens, 0, i));
 					else
 						previous = String.join(" ", Arrays.copyOfRange(tokens, i-prev, i));
 					String middle = String.join(" ", Arrays.copyOfRange(tokens, i, im));
-					String next = String.join(" ", Arrays.copyOfRange(tokens, im, im+this.next));
-					textwindow.add(RowFactory.create(t_id, previous, middle, next));
+					if(im+this.next <= tokens.length) 
+						next = String.join(" ", Arrays.copyOfRange(tokens, im, im+this.next));
+					else
+						next = String.join(" ", Arrays.copyOfRange(tokens, im, tokens.length));
+					textwindow.add(RowFactory.create(null, previous, middle, next));
 				}	
 			}
 		}
@@ -84,12 +88,16 @@ public class Textwindow implements ExaremeVtFunction {
 				for(int i = 0; i < tokens.length-mid+1; i++) {
 					int im = i+mid;
 					String previous;
+					String next;
 					if(i-prev < 0)
 						previous = String.join(" ", Arrays.copyOfRange(tokens, 0, i));
 					else
 						previous = String.join(" ", Arrays.copyOfRange(tokens, i-prev, i));
 					String middle = String.join(" ", Arrays.copyOfRange(tokens, i, im));
-					String next = String.join(" ", Arrays.copyOfRange(tokens, im, im+this.next));
+					if(im+this.next <= tokens.length) 
+						next = String.join(" ", Arrays.copyOfRange(tokens, im, im+this.next));
+					else
+						next = String.join(" ", Arrays.copyOfRange(tokens, im, tokens.length));
 					textwindow.add(RowFactory.create(null, previous, middle, next));
 				}	
 			}
