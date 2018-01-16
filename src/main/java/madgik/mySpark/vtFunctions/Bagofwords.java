@@ -33,19 +33,12 @@ public class Bagofwords {
 	
 	public String mapReduce(SparkSession spark) throws VtExtensionParserCancelationException{
 		try{
-			// Create an RDD
-			JavaRDD<String> peopleRDD = spark.sparkContext()
-			  .textFile(filePath, 1)
-			  .toJavaRDD();
+			
 			// The schema is encoded in a string
 			String schemaString = "id bagofwords";
-	
-			// Generate the schema based on the string of schema
 			List<StructField> fields = new ArrayList<StructField>();
-			for (String fieldName : schemaString.split(" ")) {
-			  StructField field = DataTypes.createStructField(fieldName, DataTypes.StringType, true);
-			  fields.add(field);
-			}
+			fields.add(DataTypes.createStructField("id", DataTypes.StringType, true));
+			fields.add(DataTypes.createStructField("bagofwords", DataTypes.createArrayType(DataTypes.StringType), true));
 			StructType schema = DataTypes.createStructType(fields);
 			
 			Dataset<Row> articlesDataFrame = spark.read().json(this.filePath);
@@ -55,7 +48,12 @@ public class Bagofwords {
 			//6 -> pubYear
 			//8 -> title of article
 			for(Row r : articlesDataFrame.collectAsList()) {
-				output_rows.add(RowFactory.create(r.getString(2), r.getString(3)+ " %% "+ r.getString(6)+" %% " +r.getString(8)));
+				List<String> new_list = new ArrayList<String>() ;
+				new_list.add(r.getString(3)); //take journal title
+				new_list.add(r.getString(6)); // take publication year
+				// new_list.add((r.getString(0))); need to take the authors.now it only takes journal title and pubyear
+				ArrayList<String> temp_arraylist = new ArrayList<String>(new_list);
+				output_rows.add(RowFactory.create(r.getString(2), temp_arraylist));
 			}
 			
 			
@@ -63,7 +61,7 @@ public class Bagofwords {
 			Dataset<Row> bagofwordsDataFrame = spark.createDataFrame(output_rows, schema);
 	
 			// Creates a temporary view using the DataFrame
-			bagofwordsDataFrame.limit(200).createOrReplaceTempView("people");
+			bagofwordsDataFrame.createOrReplaceTempView("people");
 			
 			return "people";
 		}catch(Exception e){
