@@ -76,7 +76,7 @@ public class Textwindow implements ExaremeVtFunction {
 						next = String.join(" ", Arrays.copyOfRange(tokens, im, im+this.next));
 					else
 						next = String.join(" ", Arrays.copyOfRange(tokens, im, tokens.length));
-					textwindow.add(RowFactory.create(null, previous, middle, next));
+					textwindow.add(RowFactory.create(t_id, previous, middle, next));
 				}	
 			}
 		}
