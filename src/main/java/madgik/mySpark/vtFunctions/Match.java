@@ -19,36 +19,16 @@ public class Match implements ExaremeVtFunction {
 	private Dataset<Row> char_inv_index;
 	
 	public Match(Dataset<Row> ids1, Dataset<Row> ids2) {
-		this.references = ids1;
-		this.char_inv_index = ids2;
+		this.references = ids2;
+		this.char_inv_index = ids1;
 	}
 	
 	@Override
 	public String mapReduce(SparkSession spark) {
-		// The schema is encoded in a string
-		String schemaString = "reference md_article_id";
-		// Generate the schema based on the string of schema
-		List<StructField> fields = new ArrayList<StructField>();
-		fields.add(DataTypes.createStructField("reference", DataTypes.StringType, true));
-		fields.add(DataTypes.createStructField("md_trigram", DataTypes.StringType, true));
-		fields.add(DataTypes.createStructField("md_article_id", DataTypes.createArrayType(DataTypes.StringType), true));
-		StructType schema = DataTypes.createStructType(fields);
 		
-		// Matching phase
-		ArrayList<Row> matches = new ArrayList<Row>();
-		for(Row ref : references.collectAsList()) { // iterate over the trigrams of the reference section
-			
-			for(Row metadata : char_inv_index.collectAsList()) { // iterate over the trigrams of the metadata
-				//System.out.println(ref.getString(2)+" || "+metadata.getString(0));
-				if(ref.getString(2).compareTo(metadata.getString(0)) == 0) {
-					String temp = ref.getString(1)+" "+ref.getString(2)+" "+ref.getString(3);
-					matches.add(RowFactory.create(temp, metadata.getString(0), metadata.getList(1)));
-				}
-			}
-			
-		}
-		Dataset<Row> matchesDataset = spark.createDataFrame(matches, schema);
-		matchesDataset.createOrReplaceTempView("matches");
+		Dataset<Row> matches = references.join(char_inv_index, references.col("middle").equalTo(char_inv_index.col("trigram")));
+		
+		matches.createOrReplaceTempView("matches");
 		return "matches";
 	}
 
