@@ -10,7 +10,7 @@ for file in $( find $xml_dir -type f)
 	b="$(basename $file | rev | cut -d"." -f2-  | rev)"	#take PCM.15
 	c="$output_dir/$b.json"
 
-	xml2json -t xml2json $file --strip_text | jq -c '[.[] | del(.issue, .journalVolume, .journalIssn, .pubType, .pageInfo)]' >> $c
+	xml2json -t xml2json $file --strip_text | jq -c '.[].PMC_ARTICLE | .[] | del(.issue, .journalVolume, .journalIssn, .pubType, .pageInfo)' >> $c
 	#echo $b
 	echo "$file completely processed"
 	done 
