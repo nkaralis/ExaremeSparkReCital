@@ -12,6 +12,7 @@ import madgik.mySpark.parser.ParserUtils;
 import madgik.mySpark.parser.exception.VtExtensionParserException;
 import madgik.mySpark.udaf.Joinstr;
 import org.apache.spark.sql.api.java.UDF2;
+import org.apache.spark.sql.api.java.UDF3;
 import org.apache.commons.lang3.StringUtils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,6 +39,7 @@ public class ExaremeSpark {
 				spark.getSparkSession().udf().register("Normtitles",Normtitles,DataTypes.StringType);
 				spark.getSparkSession().udf().register("Comprspaces",Comprspaces,DataTypes.StringType);
 				spark.getSparkSession().udf().register("Regexpcountwords",Regexpcountwords,DataTypes.IntegerType);
+				spark.getSparkSession().udf().register("Regexpr",Regexpr,DataTypes.StringType);
 				spark.getSparkSession().udf().register("Joinstr", new Joinstr());
 				String query;
 				try{
@@ -72,7 +74,7 @@ public class ExaremeSpark {
 		}
 	};
 	//select comprspaces(line,"NULL") from (select * from foo(file for foo to read to dataset containing only one field with value line)
-	//second argument NULL for the needs of the execercise
+	//second argument NULL for the needs of the excercise
 	private static UDF2<String,String,String> Comprspaces = new UDF2<String,String,String>(){
 		@Override
 		public String call(String arg0, String arg1) throws Exception {
@@ -83,6 +85,7 @@ public class ExaremeSpark {
 	            return arg0.trim().replaceAll(" +"," ") +" "+ arg1.trim().replaceAll(" +"," ");
 		}
 	};
+	//select regexpcountwords('start',line) from (select * from foo(',','../demospaces.txt'))
 	private static UDF2<String,String,Integer> Regexpcountwords = new UDF2<String,String,Integer>(){
 		@Override
 		public Integer call(String arg0, String arg1) throws Exception {
@@ -93,7 +96,6 @@ public class ExaremeSpark {
              int sum = 0;
              int occurences ;
              while (myMatcher.find()) {
-                   // Do your stuff here
                    occurences = 0; 
                    System.out.println(myMatcher.group());
                    occurences = StringUtils.countMatches(myMatcher.group().trim()," ") + 1;
@@ -103,11 +105,47 @@ public class ExaremeSpark {
              return sum;
 		}
 	};
+	//select regexpr('start\\\\s(\\\\w+)\\\\send',line,'NULL') from foo(',','../demospaces.txt')
+	//select regexpr('\\\\W+',line,'nonword') from foo(',','../demospaces.txt')	 line = @#$%@$#% tobereplaced @#$%@#$%
+	//select regexpr('\\\\w+).*?(\\\\w+)',line,'NULL') from foo(',','../demospaces.txt') line = one two three,exaremesql does not accep parentheses 
 	
-	//select regexpcountwords('start',line) from (select * from foo(',','../demospaces.txt'))
-	
-	
-	
+	private static UDF3<String,String,String,String> Regexpr = new UDF3<String,String,String,String>(){
+		//escape character backslash needs 4 backslashes for spark to identify it
+		@Override
+		public String call(String pattern, String expression, String replace_expression) throws Exception {
+			int count = 0,i;
+            String ret_str = "";
+            if (!pattern.equals("NULL"))
+               count = count + 1;
+            if (!expression.equals("NULL"))
+               count = count + 1;
+            if (!replace_expression.equals("NULL"))
+               count = count + 1;
+
+            //case we have less than two arguments
+            if (count<2)
+               return "NULL";
+            else if (count==2){        //case we have exactly two arguments
+               Pattern myPattern = Pattern.compile(pattern, Pattern.UNICODE_CHARACTER_CLASS);
+               Matcher myMatcher = myPattern.matcher(expression);
+               if (myMatcher.find()){
+                  if (myMatcher.groupCount()>0){  //While matcher finds something append concatenate it with return string
+                     int groupCount = myMatcher.groupCount();
+                      for (i = 1; i <= groupCount; i++) 
+                           ret_str = ret_str + myMatcher.group(i) +" ";
+                      return ret_str;
+                  }
+                  else
+                     return "True";
+               }
+               else
+                  return "NULL";
+            }
+            else                     //case we have three arguments
+               return expression.replaceAll(pattern,replace_expression);
+		}
+		
+	};
 	
 	
 	
