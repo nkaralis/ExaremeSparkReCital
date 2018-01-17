@@ -11,7 +11,7 @@ import madgik.mySpark.console.Console;
 import madgik.mySpark.parser.ParserUtils;
 import madgik.mySpark.parser.exception.VtExtensionParserException;
 import madgik.mySpark.udaf.Joinstr;
-
+import org.apache.spark.sql.api.java.UDF2;
 ///
 
 public class ExaremeSpark {
@@ -33,6 +33,7 @@ public class ExaremeSpark {
 						.getOrCreateExareme();   
 				
 				spark.getSparkSession().udf().register("Normtitles",Normtitles,DataTypes.StringType);
+				spark.getSparkSession().udf().register("Comprspaces",Comprspaces,DataTypes.StringType);
 				spark.getSparkSession().udf().register("Joinstr", new Joinstr());
 				String query;
 				try{
@@ -66,5 +67,28 @@ public class ExaremeSpark {
 			return str.toLowerCase().replaceAll("[^a-zA-z0-9 ]","_").replaceAll(" +"," ");
 		}
 	};
+	private static UDF2<String,String,String> Comprspaces = new UDF2<String,String,String>(){
+		@Override
+		public String call(String arg0, String arg1) throws Exception {
+			if (arg1.equals("NULL"))
+	            return arg0.trim().replaceAll(" +"," ");
+	         
+	         else
+	            return arg0.trim().replaceAll(" +"," ") +" "+ arg1.trim().replaceAll(" +"," ");
+		}
+	};
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 }
