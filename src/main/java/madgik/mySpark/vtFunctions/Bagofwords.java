@@ -31,9 +31,23 @@ public class Bagofwords {
 		this.filePath = filePath;
 	}
 	
+	public String GetAuthors(String line) {
+		String final1="";
+        String[] list ;
+		if (line!=null){
+            list = line.split(","); // list[0] = "LastName":"Planansky"
+            for (int index = 1 ; index < list.length; index+=3){
+               String[] list1;
+               list1 = list[index].split(":");
+               final1 = final1 + list1[1].replaceAll("\"","")+ " ";
+            }
+            return final1;
+        }else
+            return "null";
+	}
 	public String mapReduce(SparkSession spark) throws VtExtensionParserCancelationException{
 		try{
-			
+		
 			// The schema is encoded in a string
 			String schemaString = "id bagofwords";
 			List<StructField> fields = new ArrayList<StructField>();
@@ -42,21 +56,18 @@ public class Bagofwords {
 			StructType schema = DataTypes.createStructType(fields);
 			
 			Dataset<Row> articlesDataFrame = spark.read().json(this.filePath);
+			
+			Dataset<Row> authors = articlesDataFrame.select("id","AuthorList.Author","journalTitle","pubYear");//.createOrReplaceTempView("people");
 			ArrayList<Row> output_rows = new ArrayList<Row>();
-			//2 -> publication id
-			//3 -> journalTitle
-			//6 -> pubYear
-			//8 -> title of article
-			for(Row r : articlesDataFrame.collectAsList()) {
+			for(Row r : authors.collectAsList()) {
 				List<String> new_list = new ArrayList<String>() ;
-				new_list.add(r.getString(3)); //take journal title
-				new_list.add(r.getString(6)); // take publication year
-				// new_list.add((r.getString(0))); need to take the authors.now it only takes journal title and pubyear
+				new_list.add(r.getString(2));  //journal title
+				new_list.add(r.getString(3)); //pubyear
+				new_list.add(GetAuthors(r.getString(1))); //author surnames
 				ArrayList<String> temp_arraylist = new ArrayList<String>(new_list);
-				output_rows.add(RowFactory.create(r.getString(2), temp_arraylist));
+				output_rows.add(RowFactory.create(r.getString(0),temp_arraylist));
 			}
-			
-			
+		
 			// Apply the schema to the RDD
 			Dataset<Row> bagofwordsDataFrame = spark.createDataFrame(output_rows, schema);
 	
