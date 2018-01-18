@@ -41,6 +41,7 @@ public class ExaremeSpark {
 				spark.getSparkSession().udf().register("Regexpcountwords",Regexpcountwords,DataTypes.IntegerType);
 				spark.getSparkSession().udf().register("Regexpr",Regexpr,DataTypes.StringType);
 				spark.getSparkSession().udf().register("Findsignal", Findsignal,DataTypes.IntegerType);
+				spark.getSparkSession().udf().register("Regexpcountdistance",Regexpcountdistance,DataTypes.DoubleType);
 				spark.getSparkSession().udf().register("Joinstr", new Joinstr());
 				String query;
 				try{
@@ -144,6 +145,26 @@ public class ExaremeSpark {
             }
             else                     //case we have three arguments
                return expression.replaceAll(pattern,replace_expression);
+		}
+		
+	};
+	
+	private static UDF2<String,String,Double> Regexpcountdistance = new UDF2<String,String,Double>(){
+		//for each group of matcher we add count the result of division of 1 with the length(in terms of words) of the expression
+		//example : select regexpcountdistance('start',line) as match_score from (select * from foo(',','../demospaces.txt'))
+		//output : 0.66 for line : start end start
+		@Override
+		public Double call(String pattern, String expression) throws Exception {
+			   double count = 0.0;
+	          
+	           Pattern myPattern = Pattern.compile(pattern, Pattern.UNICODE_CHARACTER_CLASS);
+	           Matcher myMatcher = myPattern.matcher(expression);
+	           int exlength = expression.split(" ").length;
+	           while (myMatcher.find()){
+	               count = count + 1.0/exlength;
+	           }
+
+	           return count;
 		}
 		
 	};
