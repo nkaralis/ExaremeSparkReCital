@@ -40,6 +40,7 @@ public class ExaremeSpark {
 				spark.getSparkSession().udf().register("Comprspaces",Comprspaces,DataTypes.StringType);
 				spark.getSparkSession().udf().register("Regexpcountwords",Regexpcountwords,DataTypes.IntegerType);
 				spark.getSparkSession().udf().register("Regexpr",Regexpr,DataTypes.StringType);
+				spark.getSparkSession().udf().register("Findsignal", Findsignal,DataTypes.IntegerType);
 				spark.getSparkSession().udf().register("Joinstr", new Joinstr());
 				String query;
 				try{
@@ -51,7 +52,7 @@ public class ExaremeSpark {
 				}
 				
 				try{
-					spark.sqlExtended(query).show(100,false);;
+					spark.sqlExtended(query).show(1000,false);;
 				}catch(VtExtensionParserException e) {
 					if(e.getMessage() != null)
 						Console.printMessage(ParserUtils.displayError(e.getMessage()));
@@ -146,8 +147,25 @@ public class ExaremeSpark {
 		}
 		
 	};
-	
-	
+	//execute command example
+	//select line,findsignal(line) as signal from(select * from readpaper('../demo.txt'))
+	private static UDF1<String,Integer> Findsignal = new UDF1<String,Integer>(){
+
+		@Override
+		public Integer call(String l) throws Exception {
+			 String pattern = "((.*)1[5-9]\\d{2,2}(.*))|((.*)20\\d{2,2}(.*))|((.*)[^A-Za-z0-9]et al[^A-Za-z0-9](.*))|((.*)http(.*))";  
+			 Pattern r = Pattern.compile(pattern);
+			 Matcher matcher = r.matcher(l);
+			 int result = -1;
+			 if (matcher.find())
+					result = 1;
+			 else
+					result = 0;
+		
+			return result;
+		}
+		
+	};
 	
 	
 	
