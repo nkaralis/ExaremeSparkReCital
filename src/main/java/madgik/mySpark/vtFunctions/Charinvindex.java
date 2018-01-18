@@ -50,6 +50,7 @@ public class Charinvindex implements ExaremeVtFunction {
 			ArrayList<Row> new_rows = new ArrayList<Row>();
 			Dataset<Row> temp = input_dataset.filter(functions.size(input_dataset.col("title_id")).equalTo(threshold));
 			if(temp.count() > 0) {
+				threshold = 1;
 				char_inv_index_dataset = char_inv_index_dataset.union(temp).dropDuplicates("title_id");
 				for(Row r : temp.select("title_id").collectAsList()) {
 					titles_to_be_removed.addAll(r.getList(0));
@@ -69,6 +70,8 @@ public class Charinvindex implements ExaremeVtFunction {
 		}
 		
 		char_inv_index_dataset.createOrReplaceTempView("charinvindex");
+		System.out.println("");
+		System.out.println("Characteristic inverted index is ready!");
 		return "charinvindex";
 	}
 
