@@ -26,9 +26,26 @@ public class Match implements ExaremeVtFunction {
 	@Override
 	public String mapReduce(SparkSession spark) {
 		
+		// The schema is encoded in a string
+		String schemaString = "trigram title_id";
+		// Generate the schema based on the string of schema
+		List<StructField> fields = new ArrayList<StructField>();
+		fields.add(DataTypes.createStructField("window", DataTypes.StringType, true));
+		fields.add(DataTypes.createStructField("metadata_trigram", DataTypes.StringType, true));
+		fields.add(DataTypes.createStructField("metadata_ids", DataTypes.createArrayType(DataTypes.StringType), true));
+		StructType schema = DataTypes.createStructType(fields);
+		
+		// find matches
 		Dataset<Row> matches = references.join(char_inv_index, references.col("middle").equalTo(char_inv_index.col("trigram")));
 		
-		matches.createOrReplaceTempView("matches");
+		// return proper schema
+		ArrayList<Row> matchTemp = new ArrayList<Row>();
+		for(Row r: matches.collectAsList()) {
+			matchTemp.add(RowFactory.create((r.get(1)+" "+r.get(2)+" "+r.get(3)), r.get(4), r.get(5)));
+		}
+		
+		Dataset<Row> matches_final = spark.createDataFrame(matchTemp, schema);
+		matches_final.createOrReplaceTempView("matches");
 		return "matches";
 	}
 
