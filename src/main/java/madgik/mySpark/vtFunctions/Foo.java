@@ -50,7 +50,7 @@ public class Foo {
 			  .textFile(filePath, 1)
 			  .toJavaRDD();
 			// The schema is encoded in a string
-			String schemaString = "name age";
+			String schemaString = "id title";
 	
 			// Generate the schema based on the string of schema
 			List<StructField> fields = new ArrayList<StructField>();
@@ -71,7 +71,7 @@ public class Foo {
 			Dataset<Row> peopleDataFrame = spark.createDataFrame(rowRDD, schema);
 	
 			// Creates a temporary view using the DataFrame
-			peopleDataFrame.createOrReplaceTempView("people");
+			peopleDataFrame.limit(50000).createOrReplaceTempView("people");
 			
 			return "people";
 		}catch(Exception e){
