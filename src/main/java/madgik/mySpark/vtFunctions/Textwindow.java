@@ -58,9 +58,9 @@ public class Textwindow implements ExaremeVtFunction {
 		// Iterate rows of input dataset
 		ArrayList<Row> textwindow = new ArrayList<Row>();
 		if(id_col != null) {
-			for (Row r : input_dataset.select(text_col, id_col).collectAsList()){
-				String t = r.getString(0); // get text / title
-				String t_id = r.getString(1); // get article id
+			for (Row r : input_dataset.select(id_col, text_col).collectAsList()){
+				String t = r.getString(1); // get text / title
+				String t_id = r.getString(0); // get article id
 				String[] tokens = t.split(delim); // split title into tokens using the specified delimeter
 				// textwindow2s
 				for(int i = 0; i < tokens.length-mid+1; i++) {
