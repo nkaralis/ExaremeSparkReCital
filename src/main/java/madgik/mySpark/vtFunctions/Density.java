@@ -14,6 +14,7 @@ import org.apache.spark.sql.types.StructType;
 
 //execution example
 //select * from density((select * from findsignals('../demo.txt')),2,1,2)
+// select * from density((select line,findsignal(line) as signal from readpaper('../demopapers/demopaper1.txt')),2,1,2)
 public class Density implements ExaremeVtFunction{
 
 	private Dataset<Row> input_dataset;
@@ -48,9 +49,12 @@ public class Density implements ExaremeVtFunction{
 		String[] lines = new String[signals.length];
 		double[] densities = new double[signals.length];
 		int counter = 0;
+		//input_dataset.show();
 		for(Row r : input_dataset.collectAsList()) {
+			
 			lines[counter] = r.getString(0);
-			signals[counter] = Integer.parseInt(r.getString(1));
+			//signals[counter] = Integer.parseInt(r.getString(1)); //if we read from a vtable
+			signals[counter] = r.getInt(1); //if we read from udf findsignal
 			counter++;
 		}
 		// Window over signals column
@@ -120,7 +124,9 @@ public class Density implements ExaremeVtFunction{
 			}
 		}
 		Dataset<Row> output_dataset = spark.createDataFrame(output_rows, schema);
+		
 		output_dataset.limit(1500).createOrReplaceTempView("densities");
+		output_dataset.show();
 		return "densities";
 	}
 
