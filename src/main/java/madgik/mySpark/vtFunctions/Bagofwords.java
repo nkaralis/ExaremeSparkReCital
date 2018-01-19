@@ -19,7 +19,7 @@ import org.apache.spark.sql.SQLContext;
 
 //select * from bagofwords('../jsonfolder/PMC.23.json')
 //spark's json reader reads only first 18721 lines of PMC.23.json
-public class Bagofwords {
+public class Bagofwords implements ExaremeVtFunction{
 
 	private String filePath;
 	
@@ -42,7 +42,7 @@ public class Bagofwords {
                list1 = list[index].split(":");
                final1 = final1 + list1[1].replaceAll("\"","")+ " ";
             }
-            System.out.println(final1);
+            //System.out.println(final1);
             return final1;
         }else
             return "null";
@@ -61,12 +61,12 @@ public class Bagofwords {
 			StructType schema = DataTypes.createStructType(fields);
 			
 			Dataset<Row> articlesDataFrame = spark.read().json(this.filePath);
-			articlesDataFrame.printSchema();
+			
 			Dataset<Row> authors = articlesDataFrame.select("id","AuthorList.Author","journalTitle","pubYear");//.createOrReplaceTempView("people");
-			authors.printSchema();
+			
 			//authors.show();
 			ArrayList<Row> output_rows = new ArrayList<Row>();
-			String tmp = "";
+			
 			for(Row r : authors.collectAsList()) {
 			
 			/*List<String> new_list = new ArrayList<String>() ;
@@ -77,17 +77,14 @@ public class Bagofwords {
 				//new_list.add(GetAuthors(r.getString(1))); //author surnames
 				ArrayList<String> temp_arraylist = new ArrayList<String>(new_list);
 			*/ 
-				tmp = "";
-				tmp = GetAuthors(r.getString(1));
-				System.out.println(tmp);
-				System.out.println(r.getString(1));
-				output_rows.add(RowFactory.create(r.getString(0),r.getString(2),r.getString(3),tmp));
+				
+				output_rows.add(RowFactory.create(r.getString(0),r.getString(2),r.getString(3),GetAuthors(r.getString(1))));
 			}
 			// Apply the schema to the RDD
 			Dataset<Row> bagofwordsDataFrame = spark.createDataFrame(output_rows, schema);
-			bagofwordsDataFrame.show();
+			
 			// Creates a temporary view using the DataFrame
-			bagofwordsDataFrame.limit(10).createOrReplaceTempView("people");
+			bagofwordsDataFrame.createOrReplaceTempView("people");
 			
 			return "people";
 		}catch(Exception e){
