@@ -2,11 +2,9 @@ package madgik.mySpark.vtFunctions;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
@@ -24,7 +22,7 @@ public class Readpaper  implements ExaremeVtFunction {
 		this.filepath = filePath;
 		
 	}
-	
+//	select line,findsignal(line) as signal from readpaper('../demopapers/demopaper1.txt')
 	@Override
 	public String mapReduce(SparkSession spark){
 		// Create an RDD
@@ -52,7 +50,7 @@ public class Readpaper  implements ExaremeVtFunction {
 
 		// finally we create dataset and view
 		Dataset<Row> output_dataset = spark.createDataFrame(readpaper, schema);
-		output_dataset.limit(1500).createOrReplaceTempView("readpaper");
+		output_dataset.createOrReplaceTempView("readpaper");
 		
 		return "readpaper";
 

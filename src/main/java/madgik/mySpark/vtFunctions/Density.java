@@ -1,7 +1,7 @@
 package madgik.mySpark.vtFunctions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.List;
 
 import org.apache.spark.sql.Dataset;

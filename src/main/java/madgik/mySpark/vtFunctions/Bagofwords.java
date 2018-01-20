@@ -1,11 +1,10 @@
 package madgik.mySpark.vtFunctions;
 
-import java.io.FileNotFoundException;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.Function;
+
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
@@ -15,7 +14,7 @@ import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 
 import madgik.mySpark.parser.exception.VtExtensionParserCancelationException;
-import org.apache.spark.sql.SQLContext;
+
 
 //select * from bagofwords('../jsonfolder/PMC.23.json')
 //spark's json reader reads only first 18721 lines of PMC.23.json
@@ -51,7 +50,7 @@ public class Bagofwords implements ExaremeVtFunction{
 		try{
 		
 			// The schema is encoded in a string
-			String schemaString = "id journalTitle pubYear Authors";
+			
 			List<StructField> fields = new ArrayList<StructField>();
 			fields.add(DataTypes.createStructField("id", DataTypes.StringType, true));
 			fields.add(DataTypes.createStructField("title", DataTypes.StringType, true));
