@@ -24,8 +24,7 @@ public class Validation implements ExaremeVtFunction {
 		this.match_fields = ids1;
 		this.metadata_bow = ids2;
 	}
-	//initially i want to perform the join - check
-	//now i want to get elements for regex functions
+
 	//works for one match
 	
 	public  String comprspaces(String str1,String str2){
@@ -152,21 +151,15 @@ public class Validation implements ExaremeVtFunction {
 								//to count the year's reflection on the match window
 								+ 3*regexpcountdistance(year,comprspaces(regexpr("\\b(\\w{1,2})\\b",regexpr(title,window," "),"Null"),"Null")))
 								/(10*calc((regexpcountwords("\\s",comprspaces(window,"Null")) - regexpcountwords("\\s",title)))) 
-								//leipei i diairesi
+								
 								+((regexpcountwords("\\s",title)+1)*1.0/(regexpcountwords("\\s",comprspaces(window,"Null"))+1))*1.0/2 
 								;
 								
 			validityTemp.add(RowFactory.create(window,r.getString(1),r.getString(2),confidence));
-			//System.out.println(r);
+			
 			
 		}
-		//double confidence = (10*regexpcountdistance(authors,comprspaces(regexpr("\\b(\\w{1,2})\\b",regexpr(journal,window,""),"Null"),"Null")));
-		//System.out.println(window);
-		//System.out.println(authors);
-		//System.out.println(year);
-		//System.out.println(journal);
-		//System.out.println(title);
-		//System.out.println(confidence);
+	
 		
 		Dataset<Row> validity_final = spark.createDataFrame(validityTemp, schema);
 		validity_final.createOrReplaceTempView("validity");
