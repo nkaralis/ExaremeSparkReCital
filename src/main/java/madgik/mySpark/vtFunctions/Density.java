@@ -125,8 +125,7 @@ public class Density implements ExaremeVtFunction{
 		}
 		Dataset<Row> output_dataset = spark.createDataFrame(output_rows, schema);
 		
-		output_dataset.limit(1500).createOrReplaceTempView("densities");
-		output_dataset.show();
+		output_dataset.createOrReplaceTempView("densities");
 		return "densities";
 	}
 

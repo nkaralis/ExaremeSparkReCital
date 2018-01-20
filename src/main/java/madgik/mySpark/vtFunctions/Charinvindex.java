@@ -70,8 +70,6 @@ public class Charinvindex implements ExaremeVtFunction {
 		}
 		
 		char_inv_index_dataset.createOrReplaceTempView("charinvindex");
-		System.out.println("");
-		System.out.println("Characteristic inverted index is ready!");
 		return "charinvindex";
 	}
 

@@ -119,7 +119,7 @@ public class Validation implements ExaremeVtFunction {
 		fields.add(DataTypes.createStructField("confidence", DataTypes.DoubleType, true));
 		StructType schema = DataTypes.createStructType(fields);
 		
-		Dataset<Row> validityDataFrame = match_fields.join(metadata_bow, match_fields.col("metadata_ids").equalTo(metadata_bow.col("id")));
+		Dataset<Row> validityDataFrame = match_fields.join(metadata_bow, match_fields.col("metadata_id").equalTo(metadata_bow.col("id")));
 		//validityDataFrame.show();
 		//validityDataFrame.createOrReplaceTempView("validity");
 		

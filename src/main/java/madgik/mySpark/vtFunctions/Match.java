@@ -26,13 +26,11 @@ public class Match implements ExaremeVtFunction {
 	@Override
 	public String mapReduce(SparkSession spark) {
 		
-		// The schema is encoded in a string
-		String schemaString = "trigram title_id";
-		// Generate the schema based on the string of schema
+		// Generate the schema
 		List<StructField> fields = new ArrayList<StructField>();
 		fields.add(DataTypes.createStructField("window", DataTypes.StringType, true));
 		fields.add(DataTypes.createStructField("metadata_trigram", DataTypes.StringType, true));
-		fields.add(DataTypes.createStructField("metadata_ids", DataTypes.createArrayType(DataTypes.StringType), true));
+		fields.add(DataTypes.createStructField("metadata_id", DataTypes.StringType, true));
 		StructType schema = DataTypes.createStructType(fields);
 		
 		// find matches
@@ -41,7 +39,9 @@ public class Match implements ExaremeVtFunction {
 		// return proper schema
 		ArrayList<Row> matchTemp = new ArrayList<Row>();
 		for(Row r: matches.collectAsList()) {
-			matchTemp.add(RowFactory.create((r.get(1)+" "+r.get(2)+" "+r.get(3)), r.get(4), r.get(5)));
+			for (Object id : r.getList(5)) {
+				matchTemp.add(RowFactory.create((r.getString(1)+" "+r.getString(2)+" "+r.getString(3)), r.getString(4), (String) id));
+			}
 		}
 		
 		Dataset<Row> matches_final = spark.createDataFrame(matchTemp, schema);
