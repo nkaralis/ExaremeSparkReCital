@@ -54,6 +54,7 @@ public class Bagofwords implements ExaremeVtFunction{
 			String schemaString = "id journalTitle pubYear Authors";
 			List<StructField> fields = new ArrayList<StructField>();
 			fields.add(DataTypes.createStructField("id", DataTypes.StringType, true));
+			fields.add(DataTypes.createStructField("title", DataTypes.StringType, true));
 			fields.add(DataTypes.createStructField("journalTitle", DataTypes.StringType, true));
 			fields.add(DataTypes.createStructField("pubYear", DataTypes.StringType, true));
 			fields.add(DataTypes.createStructField("Authors", DataTypes.StringType, true));
@@ -62,7 +63,7 @@ public class Bagofwords implements ExaremeVtFunction{
 			
 			Dataset<Row> articlesDataFrame = spark.read().json(this.filePath);
 			
-			Dataset<Row> authors = articlesDataFrame.select("id","AuthorList.Author","journalTitle","pubYear");//.createOrReplaceTempView("people");
+			Dataset<Row> authors = articlesDataFrame.select("id","title","AuthorList.Author","journalTitle","pubYear");//.createOrReplaceTempView("people");
 			
 			//authors.show();
 			ArrayList<Row> output_rows = new ArrayList<Row>();
@@ -78,7 +79,7 @@ public class Bagofwords implements ExaremeVtFunction{
 				ArrayList<String> temp_arraylist = new ArrayList<String>(new_list);
 			*/ 
 				
-				output_rows.add(RowFactory.create(r.getString(0),r.getString(2),r.getString(3),GetAuthors(r.getString(1))));
+				output_rows.add(RowFactory.create(r.getString(0),r.getString(1),r.getString(3),r.getString(4),GetAuthors(r.getString(2))));
 			}
 			// Apply the schema to the RDD
 			Dataset<Row> bagofwordsDataFrame = spark.createDataFrame(output_rows, schema);
