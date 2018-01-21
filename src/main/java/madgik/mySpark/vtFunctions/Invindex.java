@@ -54,7 +54,7 @@ private Dataset<Row> input_dataset;
 		}
 		// Create dataset for the inverted_index
 		Dataset<Row> inv_index_dataset = spark.createDataFrame(rows, schema);
-		inv_index_dataset.createOrReplaceTempView("invindex");
+		inv_index_dataset.sort("trigram").createOrReplaceTempView("invindex");
 		
 		return "invindex";
 	}
